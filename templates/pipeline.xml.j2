@@ -1,0 +1,90 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job">
+  <actions/>
+  <description>{{ description |default("") }}</description>
+  <keepDependencies>false</keepDependencies>
+  
+  {%- if properties %}
+  <properties>
+    {%- if properties.parameter %}
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+
+        {%- if properties.parameter.buildName %}
+        {%- set _buildName = properties.parameter.buildName %}
+        <cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition plugin="oes-pipeline">
+          <name>{{ _buildName.name }}</name>
+          <jobName>{{ _buildName.jobName }}</jobName>
+          <countLimit>{{ _buildName.countLimit | default(10) }}</countLimit>
+        </cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition>
+        {%- endif %}
+      
+        {%- if properties.parameter.listGitBranches %}
+        {%- set _listGitBranches = properties.parameter.listGitBranches %}
+        <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter">
+          <name>{{ _listGitBranches.name }}</name>
+          <remoteURL>{{ _listGitBranches.remoteURL }}</remoteURL>
+          <credentialsId>{{ _listGitBranches.credentialsId }}</credentialsId>
+          <quickFilterEnabled>{{ _listGitBranches.quickFilterEnabled }}</quickFilterEnabled>
+          <type>{{ _listGitBranches.type }}</type>
+          <tagFilter>{{ _listGitBranches.tagFilter }}</tagFilter>
+          <branchFilter>{{ _listGitBranches.branchFilter }}</branchFilter>
+          <sortMode>{{ _listGitBranches.sortMode }}</sortMode>
+          <selectedValue>{{ _listGitBranches.selectedValue }}</selectedValue>
+        </com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition>
+        {%- endif %}
+
+        {%- if properties.parameter.choice %}
+        {%- set _choice = properties.parameter.choice %}
+        <hudson.model.ChoiceParameterDefinition>
+          <name>{{ _choice.name }}</name>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              {%- for _v in _choice.choices %}
+              <string>{{ _v }}</string>
+              {%- endfor %}
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        {%- endif %}
+      </parameterDefinitions>
+
+    </hudson.model.ParametersDefinitionProperty>
+    {%- endif %}
+  </properties>
+  {%- endif %}
+  <definition class="cn.opsbox.jenkinsci.plugins.cps.OesTemplateFlowDefinition" plugin="oes-template">
+    
+    {%- if oesTemplate.consoleProvider %}
+    {% set _consoleProvider = oesTemplate.consoleProvider %}
+    <configProvider class="cn.opsbox.jenkinsci.plugins.cps.ConsoleOesTemplateFlowDefinitionConfiguration">
+      <script>{{ _consoleProvider.script }}</script>
+    </configProvider>
+    {%- endif %}
+    {%- if oesTemplate.scmProvider %}
+    {% set _scmProvider = oesTemplate.scmProvider %}
+    <configProvider class="cn.opsbox.jenkinsci.plugins.cps.ScmOesTemplateFlowDefinitionConfiguration">
+      <scm class="hudson.plugins.git.GitSCM" plugin="git">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+          <hudson.plugins.git.UserRemoteConfig>
+            <url>{{ _scmProvider.gitSCM.url }}</url>
+            <credentialsId>{{ _scmProvider.gitSCM.credentialsId }}</credentialsId>
+          </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+          <hudson.plugins.git.BranchSpec>
+            <name>{{ _scmProvider.gitSCM.branch }}</name>
+          </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="empty-list"/>
+        <extensions/>
+      </scm>
+      <scriptPath>{{ _scmProvider.scriptPath }}</scriptPath>
+    </configProvider>
+    {%- endif %}
+    <parameters>{{ oesTemplate.parameters | default("") }}</parameters>
+  </definition>
+  <disabled>false</disabled>
+</flow-definition>

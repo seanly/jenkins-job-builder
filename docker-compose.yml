@@ -1,0 +1,13 @@
+version: '3'
+services:
+  jenkins-tools:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: registry.cn-hangzhou.aliyuncs.com/k8ops/jenkins-tools:v0.1
+    restart: unless-stopped
+    tty: true
+    entrypoint: /bin/bash
+    working_dir: /code
+    volumes:
+      - ./:/code

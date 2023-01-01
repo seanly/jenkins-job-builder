@@ -1,0 +1,44 @@
+image: registry.cn-hangzhou.aliyuncs.com/k8ops/jenkins-tools:v0.1
+
+variables:
+  DOCKER_BUILDKIT: 1
+secrets:
+  JENKINS_AUTH: usernamePassword/jenkins-auth
+
+stages:
+  - name: download jenkins-cli
+    steps:
+    - use: script
+      code: |
+        # 0. download jenkins-cli.jar 
+        echo "--//INFO: download jenkins-cli.jar"
+        if [ ! -f ./jenkins-cli.jar ]; then
+            wget $JENKINS_URL/jnlpJars/jenkins-cli.jar
+        fi
+
+  - name: prepare env
+    steps:
+    - use: script
+      code: |
+        echo "JENKINS_USER_ID=${JENKINS_AUTH_USR}"             >> ${OPSBOX_ENV}
+        echo "JENKINS_API_TOKEN=${JENKINS_AUTH_PSW}"           >> ${OPSBOX_ENV}
+        
+  - name: list jobs
+    except:
+      BRANCH_NAME: ["master"]
+    steps:
+      - use: script
+        code: |
+          set -x
+          export DRY_RUN=true
+          bash create-jobs.sh
+
+  - name: create jobs
+    only:
+      BRANCH_NAME: ["master"]
+    steps:
+      - use: script
+        code: |
+          set -x
+          export DRY_RUN=false
+          bash create-jobs.sh

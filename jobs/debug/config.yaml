@@ -1,0 +1,9 @@
+jobs:
+- name: test-job
+  type: pipeline
+  description: auto-config job
+  oesTemplate:
+    consoleProvider:
+      script: |
+        echo "hello"
+        echo "${env.BRANCH_NAME}"
