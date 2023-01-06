@@ -1,15 +1,18 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job">
-  <actions/>
+  <actions>
+    <org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction plugin="workflow-multibranch">
+      <jobPropertyDescriptors>
+      </jobPropertyDescriptors>
+    </org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction>
+  </actions>
   <description>{{ description |default("") }}</description>
   <keepDependencies>false</keepDependencies>
-  
   {%- if properties %}
   <properties>
     {%- if properties.parameter %}
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-
         {%- if properties.parameter.buildName %}
         {%- set _buildName = properties.parameter.buildName %}
         <cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition plugin="oes-pipeline">
@@ -18,22 +21,20 @@
           <countLimit>{{ _buildName.countLimit | default(10) }}</countLimit>
         </cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition>
         {%- endif %}
-      
         {%- if properties.parameter.listGitBranches %}
         {%- set _listGitBranches = properties.parameter.listGitBranches %}
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter">
           <name>{{ _listGitBranches.name }}</name>
           <remoteURL>{{ _listGitBranches.remoteURL }}</remoteURL>
-          <credentialsId>{{ _listGitBranches.credentialsId }}</credentialsId>
-          <quickFilterEnabled>{{ _listGitBranches.quickFilterEnabled }}</quickFilterEnabled>
-          <type>{{ _listGitBranches.type }}</type>
-          <tagFilter>{{ _listGitBranches.tagFilter }}</tagFilter>
-          <branchFilter>{{ _listGitBranches.branchFilter }}</branchFilter>
-          <sortMode>{{ _listGitBranches.sortMode }}</sortMode>
-          <selectedValue>{{ _listGitBranches.selectedValue }}</selectedValue>
+          <credentialsId>{{ _listGitBranches.credentialsId | default("jenkins-gitlab") }}</credentialsId>
+          <quickFilterEnabled>{{ _listGitBranches.quickFilterEnabled | default("true")}}</quickFilterEnabled>
+          <type>{{ _listGitBranches.type | default("PT_BRANCH") }}</type>
+          <tagFilter>{{ _listGitBranches.tagFilter | default("*") }}</tagFilter>
+          <branchFilter>{{ _listGitBranches.branchFilter | default(".*") }}</branchFilter>
+          <sortMode>{{ _listGitBranches.sortMode | default("DESCENDING_SMART") }}</sortMode>
+          <selectedValue>{{ _listGitBranches.selectedValue | default("TOP") }}</selectedValue>
         </com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition>
         {%- endif %}
-
         {%- if properties.parameter.choice %}
         {%- set _choice = properties.parameter.choice %}
         <hudson.model.ChoiceParameterDefinition>
@@ -48,13 +49,11 @@
         </hudson.model.ChoiceParameterDefinition>
         {%- endif %}
       </parameterDefinitions>
-
     </hudson.model.ParametersDefinitionProperty>
     {%- endif %}
   </properties>
   {%- endif %}
   <definition class="cn.opsbox.jenkinsci.plugins.cps.OesTemplateFlowDefinition" plugin="oes-template">
-    
     {%- if oesTemplate.consoleProvider %}
     {% set _consoleProvider = oesTemplate.consoleProvider %}
     <configProvider class="cn.opsbox.jenkinsci.plugins.cps.ConsoleOesTemplateFlowDefinitionConfiguration">
