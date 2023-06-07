@@ -1,4 +1,4 @@
-image: registry.cn-hangzhou.aliyuncs.com/k8ops/jenkins-tools:v0.1
+image: seanly/jenkins-job-builder
 
 variables:
   DOCKER_BUILDKIT: 1

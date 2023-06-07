@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    image: registry.cn-hangzhou.aliyuncs.com/k8ops/jenkins-tools:v0.1
+    image: seanly/jenkins-job-builder
     restart: unless-stopped
     tty: true
     entrypoint: /bin/bash
