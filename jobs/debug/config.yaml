@@ -6,4 +6,7 @@ jobs:
     consoleProvider:
       script: |
         echo "hello"
-        echo "${env.BRANCH_NAME}"
+        echo "${BRANCH_NAME}"
+    parameters: |
+      ---
+      BRANCH_NAME: main

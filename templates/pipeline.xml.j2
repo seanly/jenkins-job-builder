@@ -10,19 +10,20 @@
   <keepDependencies>false</keepDependencies>
   {%- if properties %}
   <properties>
-    {%- if properties.parameter %}
+    {%- if properties.parameters %}
+    {%- for _parameter in parameters %}
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        {%- if properties.parameter.buildName %}
-        {%- set _buildName = properties.parameter.buildName %}
+        {%- if _parameter.type == "buildName" %}
+        {%- set _buildName = _parameter %}
         <cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition plugin="oes-pipeline">
           <name>{{ _buildName.name }}</name>
           <jobName>{{ _buildName.jobName }}</jobName>
           <countLimit>{{ _buildName.countLimit | default(10) }}</countLimit>
         </cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition>
         {%- endif %}
-        {%- if properties.parameter.listGitBranches %}
-        {%- set _listGitBranches = properties.parameter.listGitBranches %}
+        {%- if _parameter.type == "listGitBranches" %}
+        {%- set _listGitBranches = _parameter %}
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter">
           <name>{{ _listGitBranches.name }}</name>
           <remoteURL>{{ _listGitBranches.remoteURL }}</remoteURL>
@@ -35,8 +36,8 @@
           <selectedValue>{{ _listGitBranches.selectedValue | default("TOP") }}</selectedValue>
         </com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition>
         {%- endif %}
-        {%- if properties.parameter.choice %}
-        {%- set _choice = properties.parameter.choice %}
+        {%- if _parameter.type == "choice" %}
+        {%- set _choice = _parameter %}
         <hudson.model.ChoiceParameterDefinition>
           <name>{{ _choice.name }}</name>
           <choices class="java.util.Arrays$ArrayList">
@@ -50,8 +51,10 @@
         {%- endif %}
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
+    {%- endfor %}
     {%- endif %}
   </properties>
+
   {%- endif %}
   <definition class="cn.opsbox.jenkinsci.plugins.cps.OesTemplateFlowDefinition" plugin="oes-template">
     {%- if oesTemplate.consoleProvider %}
@@ -81,6 +84,12 @@
         <extensions/>
       </scm>
       <scriptPath>{{ _scmProvider.scriptPath }}</scriptPath>
+    </configProvider>
+    {%- endif %}
+    {%- if oesTemplate.configFileProvider %}
+    {% set _configFileProvider = oesTemplate.configFileProvider %}
+    <configProvider class="cn.opsbox.jenkinsci.plugins.cps.ConfigFileProviderOesTemplateFlowDefinitionConfiguration">
+      <scriptId>{{ _configFileProvider.scriptId }}</scriptId>
     </configProvider>
     {%- endif %}
     <parameters>{{ oesTemplate.parameters | default("") }}</parameters>

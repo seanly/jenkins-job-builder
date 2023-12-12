@@ -1,13 +1,13 @@
 #!/bin/bash
-
+set -x
 DRY_RUN=${DRY_RUN:-true}
 BASE_PATH=`dirname $0`
-JOBS_DIR=${BASE_PATH}/jobs/
+JOBS_DIR=${JOBS_PATH:-"${BASE_PATH}/jobs/"}
 TEMPLATES_DIR=${BASE_PATH}/templates/
 
-export JENKINS_USER_ID=${JENKINS_USER_ID:-admin}
-export JENKINS_API_TOKEN=${JENKINS_API_TOKEN:-jenkins}
-export JENKINS_URL=${HUDSON_URL:-https://jenkins.opsbox.dev}
+export JENKINS_USER_ID=${JENKINS_USR:-admin}
+export JENKINS_API_TOKEN=${JENKINS_PSW:-jenkins}
+export JENKINS_URL=${JENKINS_URL:-https://jenkins.opsbox.dev}
 
 export CACHE_DIR=${BASE_PATH}/.cache
 

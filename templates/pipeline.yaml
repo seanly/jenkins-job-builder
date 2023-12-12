@@ -1,0 +1,40 @@
+#[PDS] pipeline def spec
+
+jobs:
+- name: test-job # job name
+  type: pipeline # job type: 当前只支持 `pipeline`
+  description: auto-config job
+  properties:
+    parameters:
+      # 构建参数类型，支持：listGitBranches，choice，buildName（需要oes-pipeline插件）
+      - type: listGitBranches
+        name: BRANCH_NAME
+        remoteURL: <git url>
+        credentialsId: <git auth credentials id>
+      - type: choice
+        name: APP_ENV
+        choices:
+        - test
+        - prod
+  oesTemplate:
+    # --- 可选类型，支持：consoleProvider，configFileProvider，scmProvider
+    consoleProvider:
+      script: |
+        echo "hello"
+        echo "${env.BRANCH_NAME}"
+    configFileProvider:
+      scriptId: JenkinsfileOpsboxForTemplate
+    # 流水线参数，也叫模版参数
+    parameters: |
+      ---
+      project:
+        branch: ${BRANCH_NAME}
+        url: <git ur>
+        pipeline:
+          template: dapper
+          variables:
+            DOCKER_IMAGE: <xxx>/<image name>
+            APP_GROUP: <product id>
+            APP_NAME: <application id>
+            APP_ENV: ${APP_ENV}
+
