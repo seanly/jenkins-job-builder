@@ -30,12 +30,13 @@ mkdir -p ${CACHE_DIR}
 
 function createPipelineJob() {
     _folderName=$1
-    _job=$2
+    _configFile=$2
+    _job=$3
     # 3. check job is exist (create/update)
     _=`${_jenkinsCli} list-jobs ${_folderName} |grep ${_job}`
     _jobExist=$?
     
-    _jobConfigYaml=`cat ${_folder}/config.yaml | yq ".jobs.[] | select(.type==\"pipeline\") | select(.name==\"${_job}\")"`
+    _jobConfigYaml=`cat ${_configFile} | yq ".jobs.[] | select(.type==\"pipeline\") | select(.name==\"${_job}\")"`
     echo "$_jobConfigYaml" > ${CACHE_DIR}/${_folderName}/${_job}.yaml
 
     # pip install jinja2-cli
@@ -60,12 +61,20 @@ function createPipelineJob() {
 
 function createJobs() {
     _folderName=$1
-    _jobs=$2
-    
-    for _job in ${_jobs}
-    do
-        createPipelineJob ${_folderName} ${_job}
-    done
+    _configFile=$2
+
+    # 2. get jobs in folder config.yaml 
+    _jobs=`cat ${_configFile} | yq '.jobs.[].name'`
+    echo "--//INFO: [${_folderName}] ${_configFile} jobs list:"
+    echo "${_jobs}"
+
+    if [ ${DRY_RUN} != true ]; then
+        for _job in ${_jobs}
+        do
+            createPipelineJob ${_folderName} ${_configFile} ${_job}
+        done
+    fi
+
 }
 
 function createFolder() {
@@ -79,7 +88,7 @@ function createFolder() {
     fi
 }
 
-function getJobs() {
+function createJobs2() {
     _folder=$1
 
     _folderName=`basename ${_folder}`
@@ -88,17 +97,16 @@ function getJobs() {
 
     createFolder ${_folderName}
 
-    # 2. get jobs in folder config.yaml 
-    _jobs=`cat ${_folder}/config.yaml  | yq '.jobs.[].name'`
-    echo "--//INFO: jobs list:"
-    echo "${_jobs}"
+    for _file in ${_folder}/*
+    do
+        if [ -d "${_file}" ]; then
+            # create jobs
+            createJobs2 ${_file}
+        elif [ -f "${_file}" ]; then
+            createJobs ${_folderName} ${_file}
+        fi
+    done
+
 }
 
-for _folder in ${JOBS_DIR}/*
-do
-    echo "$_folder"
-    getJobs ${_folder}
-    if [ ${DRY_RUN} != true ]; then
-        createJobs ${_folderName} "${_jobs}"
-    fi
-done
+createJobs2 ${JOBS_DIR}
