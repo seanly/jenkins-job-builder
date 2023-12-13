@@ -1,9 +1,17 @@
 #!/bin/bash
+
+DEBUG=${DEBUG:-false}
+
+if [ $DEBUG == true ]; then
 set -x
+fi
+
 DRY_RUN=${DRY_RUN:-true}
 BASE_PATH=`dirname $0`
 JOBS_DIR=${JOBS_PATH:-"${BASE_PATH}/jobs/"}
 TEMPLATES_DIR=${BASE_PATH}/templates/
+
+SKIP_UPDATE=${SKIP_UPDATE:-true}
 
 export JENKINS_USER_ID=${JENKINS_USR:-admin}
 export JENKINS_API_TOKEN=${JENKINS_PSW:-jenkins}
@@ -38,10 +46,14 @@ function createPipelineJob() {
     
     echo "--//INFO: ---console---"
     if [ "x$_jobExist" == "x0" ]; then
-        echo "update job: ${_folderName}/${_job}"
-        cat ${CACHE_DIR}/${_folderName}/${_job}.xml | ${_jenkinsCli} update-job ${_folderName}/${_job}
+        if [ $SKIP_UPDATE == true ]; then
+            echo "[skip] job: ${_folderName}/${_job}"
+        else
+            echo "[update job]: ${_folderName}/${_job}"
+            cat ${CACHE_DIR}/${_folderName}/${_job}.xml | ${_jenkinsCli} update-job ${_folderName}/${_job}
+        fi
     else
-        echo "create job: ${_folderName}/${_job}"
+        echo "[create] job: ${_folderName}/${_job}"
         cat ${CACHE_DIR}/${_folderName}/${_job}.xml | ${_jenkinsCli} create-job ${_folderName}/${_job}
     fi
 }
