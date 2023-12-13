@@ -7,11 +7,11 @@ jobs:
   properties:
     parameters:
       # 构建参数类型，支持：listGitBranches，choice，buildName（需要oes-pipeline插件）
-      - type: listGitBranches
+      - _type: listGitBranches
         name: BRANCH_NAME
         remoteURL: <git url>
         credentialsId: <git auth credentials id>
-      - type: choice
+      - _type: choice
         name: APP_ENV
         choices:
         - test

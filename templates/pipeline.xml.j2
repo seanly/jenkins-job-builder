@@ -11,10 +11,10 @@
   {%- if properties %}
   <properties>
     {%- if properties.parameters %}
-    {%- for _parameter in parameters %}
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        {%- if _parameter.type == "buildName" %}
+      {%- for _parameter in properties.parameters %}
+        {%- if _parameter._type == "buildName" %}
         {%- set _buildName = _parameter %}
         <cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition plugin="oes-pipeline">
           <name>{{ _buildName.name }}</name>
@@ -22,7 +22,7 @@
           <countLimit>{{ _buildName.countLimit | default(10) }}</countLimit>
         </cn.opsbox.jenkinsci.plugins.oes.parameter.BuildNameParameterDefinition>
         {%- endif %}
-        {%- if _parameter.type == "listGitBranches" %}
+        {%- if _parameter._type == "listGitBranches" %}
         {%- set _listGitBranches = _parameter %}
         <com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition plugin="list-git-branches-parameter">
           <name>{{ _listGitBranches.name }}</name>
@@ -36,7 +36,7 @@
           <selectedValue>{{ _listGitBranches.selectedValue | default("TOP") }}</selectedValue>
         </com.syhuang.hudson.plugins.listgitbranchesparameter.ListGitBranchesParameterDefinition>
         {%- endif %}
-        {%- if _parameter.type == "choice" %}
+        {%- if _parameter._type == "choice" %}
         {%- set _choice = _parameter %}
         <hudson.model.ChoiceParameterDefinition>
           <name>{{ _choice.name }}</name>
@@ -49,9 +49,9 @@
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         {%- endif %}
+      {%- endfor %}
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    {%- endfor %}
     {%- endif %}
   </properties>
 
